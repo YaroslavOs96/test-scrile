@@ -28,9 +28,14 @@ export default function SearchHints({ selectUser, partOfName }) {
                 }
                 setHintsData({ partOfName: receivedHintsData.partOfName, hintsList: receivedHintsData.hintsList })
             })
+            .catch(() => {
+                setStatusLoaded(true)
+                setHintsData({ partOfName: partOfName, hintsList: 'error' })
+            })
     };
 
     useEffect(() => {
+        console.log('hintsData', hintsData);
         if (partOfName !== hintsData.partOfName) {
             if (!partOfName) {
                 updateHintsData()
@@ -57,6 +62,13 @@ export default function SearchHints({ selectUser, partOfName }) {
     }
 
     const renderHints = (arr) => {
+        if (arr === 'error') {
+            return (
+                <div className="flex hint">
+                    <span>Что-то пошло не так, попробуйте обновить страницу</span>
+                </div >
+            )
+        }
         if (!arr) { return }
         return arr.map((item) => {
             const { id, name, avatarLink } = item;
