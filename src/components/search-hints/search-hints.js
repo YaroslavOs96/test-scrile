@@ -1,91 +1,89 @@
-import React from "react";
-import { Component } from "react/cjs/react.production.min";
+import React, { useState, useEffect } from "react";
 import Spinner from "../spinner/spinner";
-
+import getFilterUsersData from "../../services/userData";
+import { debounce } from "lodash";
 import './search-hints.css'
 
-export default class SearchHints extends Component {
+export default function SearchHints({ selectUser, partOfName }) {
+    const
+        debouncedUpdateHintsData = debounce((partOfName) => updateHintsData(partOfName), 300),
+        [hintsData, setHintsData] = useState({ partOfName: '', hintsList: '' }),
+        [statusLoaded, setStatusLoaded] = useState(true),
+        [listLoadedAvatars, setListLoadedAvatars] = useState([]);
 
-
-    constructor(props) {
-        super(props)
-
-        this.listLoadedAvatars = []
-    }
-
-    addLoadedAvatar = (link) => {
-        if (!this.listLoadedAvatars.includes(link)) {
-            this.listLoadedAvatars = [...this.listLoadedAvatars, link]
-        }
-        this.checkAllAvatarsLoaded()
-    };
-
-
-    checkAllAvatarsLoaded = () => {
-        const
-            { listLoadedAvatars } = this,
-            { hintList } = this.props,
-            listAvatarsHint = hintList.map((item) => item.avatarLink),
-            avatarLoaded = []
-
-        console.log('Maccив загруженных', listLoadedAvatars);
-        console.log('Maccив всех', listAvatarsHint);
-
-        listAvatarsHint.forEach(function (item) {
-            console.log('incloudes', item, listLoadedAvatars.includes(item));
-            const compareLink = listLoadedAvatars.includes(item);
-            avatarLoaded.push(compareLink)
-        });
-        console.log('Массив ответов на соответствие', avatarLoaded);
-
-        console.log(avatarLoaded.every(item=>item));
-
-        if (avatarLoaded.every(item=>item)) {
-            this.props.toggleLoadStatus(false)
-        }
-
-    }
-
-    renderHints(arr) {
-
-        if (!arr) {
+    function updateHintsData(partOfName) {
+        if (!partOfName) {  //*4* 
+            setHintsData({ partOfName: '', hintsList: '' })
+            setStatusLoaded(true)
             return
         }
+        setHintsData({ partOfName: partOfName, hintsList: '' })
+        setStatusLoaded(false)
+        getFilterUsersData(partOfName, hintsData.partOfName)
+            .then((receivedHintsData) => {
+                if (receivedHintsData.hintsList.length === 0) {
+                    setHintsData({ partOfName: receivedHintsData.partOfName, hintsList: '' })
+                    setStatusLoaded(true)
+                    return
+                }
+                setHintsData({ partOfName: receivedHintsData.partOfName, hintsList: receivedHintsData.hintsList })
+            })
+    };
 
-        this.checkAllAvatarsLoaded()
+    useEffect(() => {
+        if (partOfName !== hintsData.partOfName) {
+            if (!partOfName) {
+                updateHintsData()
+            } else { debouncedUpdateHintsData(partOfName) }
+        }
+    })
 
+    const addLoadedAvatar = (link) => {
+        const list = listLoadedAvatars;
+        list.push(link)
+        if (!listLoadedAvatars.includes(link)) { setListLoadedAvatars(list) }
+        checkAllAvatarsLoaded()
+    };
+
+    const checkAllAvatarsLoaded = () => {
+        if (statusLoaded) { return }
+        const
+            listAvatarsHint = hintsData.hintsList.map((item) => item.avatarLink),
+            avatarLoadedStatus = [];
+        listAvatarsHint.forEach(function (item) {
+            avatarLoadedStatus.push(listLoadedAvatars.includes(item))
+        });
+        if (avatarLoadedStatus.every(item => item)) { setStatusLoaded(true) }
+    }
+
+    const renderHints = (arr) => {
+        if (!arr) { return }
         return arr.map((item) => {
             const { id, name, avatarLink } = item;
             return (
                 <div
-                    onClick={() => { this.props.userSelect(name) }
+                    className="flex hint"
+                    onClick={() => { selectUser(name) }
                     }
                     key={id}>
                     <img
-                        onLoad={() => { this.addLoadedAvatar(avatarLink) }}
+                        className="avatar"
+                        onLoad={() => { addLoadedAvatar(avatarLink) }}
                         src={avatarLink}
                         alt={`avatar ${id}`}>
                     </img>
                     <span>
                         {name}
                     </span>
-
                 </div >
             )
         })
     }
 
-    render() {
-        const { hintList, statusLoading } = this.props;
-
-        const hints = this.renderHints(hintList);
-
-        return (
-            <div>
-                {statusLoading ? <Spinner /> : null}
-                {hints}
-            </div>
-        );
-    }
-
+    return (
+        <div className="search hint-list">
+            {!statusLoaded ? <Spinner /> : null}
+            {renderHints(hintsData.hintsList)}
+        </div>
+    );
 }

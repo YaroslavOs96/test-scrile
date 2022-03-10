@@ -1,58 +1,28 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import './app.css'
 import SearchPanel from "../search-panel/search-panel";
 import SearchHints from "../search-hints/search-hints";
-import UserData from "../../services/userData";
 
-export default class App extends Component {
-    userData = new UserData();
-    constructor() {
-        super();
-        this.state = {
-            statusLoading: false,
-            hintList: "",
-            selectedUser: ""
-        };
+export default function App() {
+
+    const [searchData, setSearchData] = useState({ inputValue: '', partOfName: '' });
+
+    const setPartOfName = (partOfName) => {
+        setSearchData({ inputValue: partOfName, partOfName: partOfName })
     }
 
-    onInputSearch = (partOfName) => {
-        if (partOfName.length > 0) {
-            this.toggleLoadStatus(true)
-        }
-
-        this.setState({ partOfName, selectedUser: "" })
-
-        this.userData.getFilterUsersData(partOfName)
-            .then((hintList) => {
-                this.setState({ hintList })
-            })
-    };
-
-    toggleLoadStatus = (status) => {
-        if (!this.state.statusLoading === status) {
-            this.setState({ statusLoading: status })
-        }
-    };
-
-    userSelect = (name) => {
-        this.setState({ selectedUser: name, hintList: '' })
-
-    };
-
-    render() {
-        const { hintList, statusLoading, selectedUser } = this.state;
-
-        return (
-            <div className="app" >
-                <SearchPanel
-                    onInputSearch={this.onInputSearch}
-                    selectedUser={selectedUser} />
-                <SearchHints
-                    toggleLoadStatus={this.toggleLoadStatus}
-                    hintList={hintList}
-                    statusLoading={statusLoading}
-                    userSelect={this.userSelect} />
-            </div>
-        )
+    const setSelectedUser = (selectedUser) => {
+        setSearchData({ inputValue: selectedUser, partOfName: '' })
     }
+
+    return (
+        <div className="app" >
+            <SearchPanel
+                setPartName={setPartOfName}
+                inputValue={searchData.inputValue} />
+            <SearchHints
+                selectUser={setSelectedUser}
+                partOfName={searchData.partOfName} />
+        </div>
+    )
 }

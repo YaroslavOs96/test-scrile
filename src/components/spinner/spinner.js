@@ -4,10 +4,10 @@ import spinner from './spinner.svg'
 
 const Spinner = () => {
     return (
-        <div>
+        <div className='flex spinner-container'>
             <img
                 src={spinner}
-                className='spinner'
+                className='spinner-img'
                 alt={"spinner"}>
             </img>
         </div>

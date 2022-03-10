@@ -1,0 +1,25 @@
+.hint-list {
+    border-radius: 0px 0px 8px 8px;
+    min-height: 0;
+    max-height: 220px;
+    overflow: hidden;
+}
+
+.avatar {
+    width: 36px;
+    border-radius: 18px;
+}
+
+.hint {
+    padding-left: 16px;
+    margin-top: 9px;
+    height: 48px;
+}
+
+.hint>span {
+    padding-left: 8px;
+}
+
+.hint:hover {
+    background: #F2F2F2;
+}

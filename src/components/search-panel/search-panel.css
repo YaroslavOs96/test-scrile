@@ -1,0 +1,26 @@
+.search {
+    background: white;
+}
+
+.magnifier{
+    width: 17px;
+}
+
+.search-input-container {
+    padding-left: 16px;
+    height: 55px;
+    border-radius: 6px 6px 0px 0px;
+    border-bottom: 1px solid #262626;
+}
+
+.search-input {
+    line-height: 45px;
+    padding-left: 16px;
+    outline: none;
+    border: none;
+    width: 100%;
+}
+
+.search-input::placeholder {
+    color: #CCC5C4;
+}
