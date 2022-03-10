@@ -11,8 +11,8 @@ export default function SearchHints({ selectUser, partOfName }) {
         [statusLoaded, setStatusLoaded] = useState(true),
         [listLoadedAvatars, setListLoadedAvatars] = useState([]);
 
-    function updateHintsData(partOfName) {
-        if (!partOfName) {  //*4* 
+    const updateHintsData = (partOfName) => {
+        if (!partOfName) {
             setHintsData({ partOfName: '', hintsList: '' })
             setStatusLoaded(true)
             return
@@ -35,13 +35,18 @@ export default function SearchHints({ selectUser, partOfName }) {
     };
 
     useEffect(() => {
-        console.log('hintsData', hintsData);
+        const timerID = setTimeout(fixPhotoLoadError, 5000);
         if (partOfName !== hintsData.partOfName) {
             if (!partOfName) {
                 updateHintsData()
             } else { debouncedUpdateHintsData(partOfName) }
         }
+        return () => clearTimeout(timerID)
     })
+
+    const fixPhotoLoadError = () => {
+        setStatusLoaded(true)
+    }
 
     const addLoadedAvatar = (link) => {
         const list = listLoadedAvatars;
@@ -70,6 +75,7 @@ export default function SearchHints({ selectUser, partOfName }) {
             )
         }
         if (!arr) { return }
+        if (!statusLoaded) { checkAllAvatarsLoaded() }
         return arr.map((item) => {
             const { id, name, avatarLink } = item;
             return (
@@ -81,7 +87,7 @@ export default function SearchHints({ selectUser, partOfName }) {
                     <img
                         className="avatar"
                         onLoad={() => { addLoadedAvatar(avatarLink) }}
-                        src={avatarLink}
+                        // src={avatarLink}
                         alt={`avatar ${id}`}>
                     </img>
                     <span>
